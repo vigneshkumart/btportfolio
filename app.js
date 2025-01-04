@@ -9,22 +9,25 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// MongoDB connection URI
-const uri = "mongodb+srv://bettertomorrowoffi:Better123@better0.ioq5uvm.mongodb.net/portfolio-forms";
+const uri =
+  "mongodb+srv://bettertomorrowoffi:Better123@better0.ioq5uvm.mongodb.net/portfolio-forms";
 
-// Create MongoDB client
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-
-// Connect to MongoDB
-let db;
-client.connect().then(() => {
-  db = client.db("portfolio-forms");
-  console.log("Connected to MongoDB");
-}).catch((error) => {
-  console.error("Failed to connect to MongoDB", error);
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
 
-// POST route for messages
+let db;
+client
+  .connect()
+  .then(() => {
+    db = client.db("portfolio-forms");
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.error("Failed to connect to MongoDB", error);
+  });
+
 app.post("/apiforms/api/messages", async (req, res) => {
   const { collegeName, email, message } = req.body;
   try {
@@ -42,7 +45,6 @@ app.post("/apiforms/api/messages", async (req, res) => {
   }
 });
 
-// POST route for registrations
 app.post("/apiforms/api/registrations", async (req, res) => {
   const {
     name,
@@ -74,14 +76,15 @@ app.post("/apiforms/api/registrations", async (req, res) => {
       role,
     };
 
-    const result = await db.collection("registrations").insertOne(newRegistration);
+    const result = await db
+      .collection("registrations")
+      .insertOne(newRegistration);
     res.send(200);
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
 });
 
-// POST route for subscriptions
 app.post("/apiforms/api/subscribe", async (req, res) => {
   const { email } = req.body;
 
@@ -93,7 +96,7 @@ app.post("/apiforms/api/subscribe", async (req, res) => {
 
     const result = await db.collection("subscribers").insertOne(newUser);
     console.log("Inserted into db");
-    
+
     res.send(200);
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
@@ -103,32 +106,60 @@ app.post("/apiforms/api/subscribe", async (req, res) => {
 app.post("/apiforms/api/feedback", async (req, res) => {
   const data = req.body;
   try {
-    console.log("Entered into Feedback form");
-    const result = await db.collection("feedback").insertOne(data);
-    
-    // Return a JSON response with a success message
-    res.status(200).json({ success: true, message: "Feedback submitted successfully!" });
+    data.timestamp = new Date().toISOString();
+
+    await db.collection("feedback").insertOne(data);
+
+    res
+      .status(200)
+      .json({ success: true, message: "Feedback submitted successfully!" });
   } catch (error) {
-    // Return a JSON response with an error message
     res.status(400).json({ success: false, error: error.message });
   }
 });
 
-// GET route for feedback
 app.get("/apiforms/api/getFeedback", async (req, res) => {
   try {
-    // Fetch all feedback entries from the "feedback" collection
     const feedbacks = await db.collection("feedback").find().toArray();
     console.log(feedbacks);
-    
-    // Return the feedback data in the response
+
     res.status(200).json({ success: true, data: feedbacks });
   } catch (error) {
-    // Return an error message if something goes wrong
     res.status(400).json({ success: false, error: error.message });
   }
 });
 
+app.get("/apiforms/api/getCampusNames", async (req, res) => {
+  try {
+    const campusNames = await db
+      .collection("feedback")
+      .distinct("college_name");
+
+    res.status(200).json({ success: true, data: campusNames });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+app.get("/apiforms/api/getFeedbackByCollege", async (req, res) => {
+  const { collegeName } = req.query;
+  try {
+    if (!collegeName) {
+      return res
+        .status(400)
+        .json({ success: false, message: "College name is required." });
+    }
+
+    const feedbacks = await db
+      .collection("feedback")
+      .find({ college_name: collegeName })
+      .toArray();
+
+    res.status(200).json({ success: true, data: feedbacks });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
 
 // Simple GET route
 app.get("/apiforms/get", async (req, res) => {
@@ -140,3 +171,4 @@ app.get("/apiforms/get", async (req, res) => {
 // app.listen(PORT, () => {
 //   console.log(`Server running on http://localhost:${PORT}`);
 // });
+app.listen();
