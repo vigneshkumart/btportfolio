@@ -15,7 +15,7 @@
 
   let db;
 
-  // Block API routes until MongoDB connection is established.
+  // Block API routes unti MongoDB connection is established.
   app.use("/apiforms/api", (req, res, next) => {
     if (!db) {
       return res.status(503).json({
