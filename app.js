@@ -9,7 +9,7 @@
   app.use(cors());
   app.use(bodyParser.json());
 
-  const uri = "mongodb://127.0.0.1:27017/";
+  const uri = "mongodb+srv://menueaswaran_db_user:vigneshkumar@cluster0.zhdmlva.mongodb.net/?appName=Cluster0";
 
   const client = new MongoClient(uri);
 
