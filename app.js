@@ -4,12 +4,17 @@
   const bodyParser = require("body-parser");
   const cors = require("cors");
   const { v4: uuidv4 } = require("uuid");
+  require("dotenv").config();
 
   const app = express();
   app.use(cors());
   app.use(bodyParser.json());
 
-  const uri = "mongodb+srv://menueaswaran_db_user:vigneshkumar@cluster0.zhdmlva.mongodb.net/?appName=Cluster0";
+  const uri = process.env.MONGODB_URI;
+
+  if (!uri) {
+    console.error("Missing MONGODB_URI environment variable.");
+  }
 
   const client = new MongoClient(uri);
 
