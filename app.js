@@ -152,6 +152,7 @@
     });
 
     // ✅ 5. Insert only clean data
+    console.log("Inserting data:", JSON.stringify(data));
     await db.collection("feedback").insertOne(data);
 
     res.status(200).json({
@@ -160,6 +161,7 @@
       Program_Name: programName,
     });
   } catch (error) {
+    console.error("Feedback submission error:", error);
     res.status(400).json({
       success: false,
       error: error.message,
@@ -401,9 +403,10 @@ app.get("/apiforms/api/getFeedbackByCollegeAndProgram", async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
+    console.error("Feedback submission error:", error);
+    res.status(400).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
